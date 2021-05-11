@@ -3,7 +3,7 @@ Tip Calculator
 
 - [ ] **As a user, I can enter a bill amount**
   - Place a UITextField on to the view
-  - **Create a property on the view controller to represent the** `UITextField` called `billAmountTextField`
+  - Create a property on the view controller to represent the `UITextField` called `billAmountTextField`
 - [ ] **As a user, I can calculate how much my tip should be**
 	- Place a `UIButton` onto the view and change the text to "Calculate Tip"
 	- Create a method for the button called calculateTip
