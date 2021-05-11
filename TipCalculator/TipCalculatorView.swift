@@ -12,7 +12,7 @@ class TipCalculatorView: UIView {
     var tipAmountLabel: UILabel = {
         let label = UILabel()
         label.text = "$0"
-        label.font = UIFont.systemFont(ofSize: 50)
+        label.font = UIFont.systemFont(ofSize: 80)
         label.textAlignment = .center
         return label
     }()
@@ -29,11 +29,18 @@ class TipCalculatorView: UIView {
         tf.leftViewMode = .always
         return tf
     }()
+    var tipPercentageLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 20)
+        label.text = "0%"
+        return label
+    }()
     var containerStackView: UIStackView = {
         let stackV = UIStackView()
         stackV.axis = .vertical
         stackV.alignment = .fill
-        stackV.distribution = .fillProportionally
+        stackV.distribution = .fill
         stackV.translatesAutoresizingMaskIntoConstraints = false
         stackV.spacing = 20
         return stackV
@@ -73,9 +80,10 @@ class TipCalculatorView: UIView {
                     slider.minimumValue = 0
                     slider.maximumValue = 100
                     slider.isContinuous = true
-                    slider.value = 15
+                    slider.value = 0
                     return slider
                 }()
+                self.containerStackView.addArrangedSubview(self.adjustTipPercentageSlider!)
             case .calculateTipButton:
                 self.calculateTipButton = {
                     let button = UIButton(type: .system)
@@ -84,12 +92,20 @@ class TipCalculatorView: UIView {
                     button.heightAnchor.constraint(equalToConstant: 44).isActive = true
                     return button
                 }()
+                self.containerStackView.addArrangedSubview(self.calculateTipButton!)
             case .tipPercentageTextField:
+                let percentageTitle = UILabel()
+                percentageTitle.text = "Tip Percentage"
+                percentageTitle.textAlignment = .left
+                percentageTitle.font = UIFont.boldSystemFont(ofSize: 20)
+                percentageTitle.layoutIfNeeded()
+                self.containerStackView.addArrangedSubview(percentageTitle)
                 self.tipPercentageTextField = {
                     let tf = UITextField()
                     tf.layer.borderWidth = 2
                     tf.layer.borderColor = UIColor.lightGray.cgColor
-                    tf.keyboardType = .decimalPad
+                    tf.keyboardType = .numberPad
+                    tf.placeholder = "Please enter tip percentage"
                     tf.layer.cornerRadius = 8
                     tf.translatesAutoresizingMaskIntoConstraints = false
                     tf.heightAnchor.constraint(equalToConstant: 44).isActive = true
@@ -97,13 +113,15 @@ class TipCalculatorView: UIView {
                     tf.leftViewMode = .always
                     return tf
                 }()
+                self.containerStackView.addArrangedSubview(self.tipPercentageTextField!)
+                self.containerStackView.addArrangedSubview(self.tipPercentageLabel)
             }
         }
     }
     
     private func layoutView() {
         NSLayoutConstraint.activate([
-            self.containerStackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 20),
+            self.containerStackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 50),
             self.containerStackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -20),
             self.containerStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 20),
             self.containerStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -20)

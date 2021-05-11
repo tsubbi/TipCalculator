@@ -9,16 +9,18 @@ import UIKit
 
 class ViewController: UIViewController {
     private(set) var type: ViewType
+    let contentView: TipCalculatorView
+    var tipPercent: Int = 0
     let contentScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
-    let contentView = TipCalculatorView(frame: .zero, type: .tipTextField)
     
     init(type: ViewType) {
         self.type = type
+        self.contentView = TipCalculatorView(frame: .zero, type: type)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -37,6 +39,18 @@ class ViewController: UIViewController {
     private func setupView() {
         self.view.addSubview(self.contentScrollView)
         self.contentScrollView.addSubview(self.contentView)
+        
+        if let calculateTipBtn = self.contentView.calculateTipButton {
+            calculateTipBtn.addTarget(self, action: #selector(self.calculateTip(_:)), for: .touchUpInside)
+        }
+        
+        if let percentageTF = self.contentView.tipPercentageTextField, self.type == .tipSlider {
+            percentageTF.addTarget(self, action: #selector(self.calculateTip(_:)), for: .editingChanged)
+        }
+        
+        if let slider = self.contentView.adjustTipPercentageSlider {
+            slider.addTarget(self, action: #selector(self.calculateTip(_:)), for: .valueChanged)
+        }
     }
     
     private func layoutView() {
@@ -54,8 +68,38 @@ class ViewController: UIViewController {
         ])
     }
 
-    @objc private func calculateTip() {
-        print("calculate")
+    @objc private func calculateTip(_ sender: Any) {
+        guard let bill = self.contentView.billAmountTextField.text, !bill.isEmpty else {
+            let alert = UIAlertController(title: "Bill is empty", message: "Please enter amount for bill", preferredStyle: .alert)
+            let action = UIAlertAction(title: "Understood", style: .default, handler: nil)
+            alert.addAction(action)
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+        
+        if sender is UITextField || sender is UISlider {
+            updatePercentage(sender)
+        } else {
+            self.tipPercent = Int(self.contentView.tipPercentageTextField?.text ?? "") ?? 0
+            self.contentView.tipPercentageLabel.text = "\(self.tipPercent)%"
+        }
+        
+        let tip = (Double(self.tipPercent)/100) * Double((bill as NSString).doubleValue)
+        
+        self.contentView.tipAmountLabel.text = "$\(String(format: "%.2f", tip))"
+    }
+    
+    private func updatePercentage(_ sender: Any) {
+        if let tf = sender as? UITextField, let value = tf.text {
+            let percentage = (value as NSString).floatValue
+            self.contentView.tipPercentageLabel.text = "\(Int(percentage))%"
+            self.contentView.adjustTipPercentageSlider?.value = percentage
+            self.tipPercent = Int(percentage)
+        } else if let slider = sender as? UISlider {
+            self.contentView.tipPercentageLabel.text = "\(Int(slider.value))%"
+            self.contentView.tipPercentageTextField?.text = "\(Int(slider.value))"
+            self.tipPercent = Int(slider.value)
+        }
     }
 }
 

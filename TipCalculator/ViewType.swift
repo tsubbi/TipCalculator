@@ -20,9 +20,9 @@ enum ViewType {
     var subViews: [SubViewTypes] {
         switch self {
         case .tipTextField:
-            return [.calculateTipButton, .tipPercentageTextField]
+            return [.tipPercentageTextField, .calculateTipButton]
         case .tipSlider:
-            return [.adjustTipPercentatgeSlider]
+            return [.tipPercentageTextField, .adjustTipPercentatgeSlider]
         }
     }
 }
