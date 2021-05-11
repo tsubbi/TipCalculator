@@ -31,9 +31,15 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(keyboardDidShow(notification:)), name: UIResponder.keyboardDidShowNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(closeKeyboard))
+        tap.numberOfTapsRequired = 1
+        self.contentView.addGestureRecognizer(tap)
         setupView()
         layoutView()
+        
     }
     
     private func setupView() {
@@ -66,6 +72,30 @@ class ViewController: UIViewController {
             self.contentView.bottomAnchor.constraint(equalTo: self.contentScrollView.contentLayoutGuide.bottomAnchor),
             self.contentView.widthAnchor.constraint(equalTo: self.contentScrollView.widthAnchor)
         ])
+    }
+    
+    @objc private func closeKeyboard() {
+        self.contentView.containerStackView.arrangedSubviews.filter({ $0 is UITextField }).forEach {
+            ($0 as! UITextField).resignFirstResponder()
+        }
+    }
+    
+    @objc private func keyboardWillHide(notification: Notification) {
+        let contentInsets = UIEdgeInsets.zero
+        self.contentScrollView.contentInset = contentInsets
+        self.contentScrollView.scrollIndicatorInsets = contentInsets
+    }
+    
+    @objc private func keyboardDidShow(notification: Notification) {
+        guard let info = notification.userInfo,
+              let keyboardFrameValue = info[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue else { return }
+        
+        let keyboardFrame = keyboardFrameValue.cgRectValue
+        let keyboardSize = keyboardFrame.size
+        
+        let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
+        self.contentScrollView.contentInset = contentInsets
+        self.contentScrollView.scrollIndicatorInsets = contentInsets
     }
 
     @objc private func calculateTip(_ sender: Any) {
